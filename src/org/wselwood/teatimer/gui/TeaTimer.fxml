@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+
+<VBox prefHeight="143.0" prefWidth="258.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.wselwood.teatimer.gui.TeaTimerController">
+  <children>
+    <GridPane prefHeight="89.0" prefWidth="190.0">
+      <children>
+        <Slider fx:id="secondsSlider" majorTickUnit="10.0" max="60.0" minorTickCount="0" showTickMarks="true" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+        <Slider fx:id="minutesSlider" majorTickUnit="10.0" max="60.0" minorTickCount="0" showTickMarks="true" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+        <Slider fx:id="hoursSlider" majorTickUnit="6.0" max="24.0" minorTickCount="0" showTickMarks="true" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+        <Label fx:id="secondsLabel" prefWidth="90.0" text="0 Seconds" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+        <Label fx:id="minutesLabel" prefWidth="90.0" text="0 Minutes" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+        <Label fx:id="hoursLabel" prefWidth="90.0" text="0 Hours" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+      </children>
+      <columnConstraints>
+        <ColumnConstraints hgrow="SOMETIMES" maxWidth="190.0" minWidth="10.0" prefWidth="190.0" />
+        <ColumnConstraints hgrow="SOMETIMES" maxWidth="129.0" minWidth="10.0" prefWidth="68.0" />
+      </columnConstraints>
+      <padding>
+        <Insets left="2.0" right="2.0" top="2.0" />
+      </padding>
+      <rowConstraints>
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      </rowConstraints>
+    </GridPane>
+    <HBox prefHeight="27.0" prefWidth="258.0">
+      <children>
+        <HBox prefHeight="23.0" prefWidth="108.0">
+          <children>
+            <Button fx:id="startStopButton" defaultButton="true" text="Start" onAction="#startStopButtonHandler"/>
+          </children>
+        </HBox>
+        <HBox alignment="TOP_RIGHT" prefHeight="23.0" prefWidth="146.0" spacing="5.0">
+          <children>
+            <Button cancelButton="true" text="Reset" onAction="#resetButtonHandler"  />
+          </children>
+          <padding>
+            <Insets right="2.0" />
+          </padding>
+        </HBox>
+      </children>
+      <padding>
+        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+      </padding>
+    </HBox>
+    <HBox prefHeight="27.0" prefWidth="258.0">
+      <children>
+        <ProgressBar fx:id="timerProgress" prefHeight="27.0" prefWidth="258.0" progress="0.0" />
+      </children>
+    </HBox>
+  </children>
+</VBox>
