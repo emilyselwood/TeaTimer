@@ -61,13 +61,13 @@ class TeaTimer extends Application {
 // Event handlers for shut down and window size.
 class ShutdownHandler(parent : TeaTimer) extends EventHandler[WindowEvent] {
     def handle(event: WindowEvent) {
-        if (parent.controller != null && parent.controller.activeThread != null) {
-            parent.controller.activeThread.interrupt()
+        if (parent.controller != null) {
+            parent.controller.shutDown()
         }
     }
 }
 
-// there is some fun here due to the differences in the class hierarchy between java and Scala. Mainly there is no Number.
+// There is some fun here due to the differences in the class hierarchy between java and Scala. Mainly there is no Number.
 class WindowSizeListener(val attribute: String, stage: Stage) extends ChangeListener[Number] {
     def changed(value: ObservableValue[_ <: Number], old: Number, updated: Number) {
 

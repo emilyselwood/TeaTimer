@@ -38,12 +38,12 @@ class TeaTimerController extends Initializable {
 
     // The thread that will be used to wait for a second and then fire another event.
     // Held at the controller level so we can interrupt it when we need to stop.
-    var activeThread            : Thread = null
+    private var activeThread            : Thread = null
 
     // The last time we ran, how long was the timer set for.
     // Keep this so we can reset back when the timer expires or the user hits the reset button after stopping the timer
     // half way through.
-    var lastStartTime           : Int = -1
+    private var lastStartTime           : Int = -1
 
     /**
      * Setup the various listeners.
@@ -175,6 +175,12 @@ class TeaTimerController extends Initializable {
         activeThread.start()
     }
 
+
+    def shutDown() {
+        if (activeThread != null) {
+            activeThread.interrupt()
+        }
+    }
 }
 
 /**
