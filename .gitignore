@@ -1,7 +1,7 @@
 *.class
 *.log
 *.bak
-
+.gradle/*
 # sbt specific
 dist/*
 build/*
