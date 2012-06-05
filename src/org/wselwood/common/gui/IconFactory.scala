@@ -23,22 +23,26 @@ object IconFactory {
     var cache: mutable.Map[String, mutable.Map[String, Image]] = mutable.Map.empty[String, mutable.Map[String, Image]]
 
     def apply(name: String): ImageView = {
-        getImage(name, "16x16")
+        getImageView(name, "16x16")
     }
 
     def apply(name: String, size: String): ImageView = {
-        getImage(name, size)
+        getImageView(name, size)
     }
 
-    private def getImage(name: String, size: String): ImageView = {
+    def getImage(name: String, size: String) : Image = {
         val realSize = convertSize(size)
-        new ImageView(cache.getOrElseUpdate(realSize, {
+        cache.getOrElseUpdate(realSize, {
             // fetch from icon size level of cache
             mutable.Map.empty[String, Image]
         }).getOrElseUpdate(name, {
             // fetch the actual icon.
             new Image(getClass.getResourceAsStream(iconPath + realSize + "/" + name + ".png"))
-        }))
+        })
+    }
+
+    private def getImageView(name: String, size: String): ImageView = {
+        new ImageView(getImage(name, size))
     }
 
     private def convertSize(size: String): String = {

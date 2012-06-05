@@ -6,7 +6,8 @@ import javafx.event.EventHandler
 import javafx.beans.value.{ChangeListener, ObservableValue}
 import javafx.stage.{Stage, WindowEvent}
 import javafx.scene.Scene
-import org.wselwood.common.gui.SceneLoader
+import javafx.scene.image.Image
+import org.wselwood.common.gui.{IconFactory, SceneLoader}
 
 /**
  * Main set up of the random dice gui
@@ -35,6 +36,8 @@ class TeaTimer extends Application {
         primaryStage.setTitle(TeaTimer.title)
         // In this case this shouldn't be re-sizable.
         primaryStage.setResizable(false)
+        // Set the window icon, use the icon factory to deal with the detritus.
+        primaryStage.getIcons.add(IconFactory.getImage("alarmclock", "32x32"))
 
         // Set a few handlers that can be useful. Remove if you don't need them.
         primaryStage.setOnHiding(new ShutdownHandler(this))
