@@ -11,13 +11,13 @@ import javafx.concurrent.{Task, WorkerStateEvent}
 import javafx.scene.media.AudioClip
 
 /**
+ * Controller for our tea timer.
  *
  * User: Sparrow
  * Date: 04/06/12
  * Time: 13:04
  *
  */
-
 class TeaTimerController extends Initializable {
 
     @FXML var secondsSlider     : Slider = null
@@ -31,13 +31,25 @@ class TeaTimerController extends Initializable {
     @FXML var startStopButton   : Button = null
     @FXML var resetButton       : Button = null
 
+    // Keeps track of the state. Are we currently counting down or setting the values.
     var timerRunning            : SimpleBooleanProperty = new SimpleBooleanProperty(false)
+    // The current value of the count down.
     var timerCount              : SimpleIntegerProperty = new SimpleIntegerProperty(0)
 
+    // The thread that will be used to wait for a second and then fire another event.
+    // Held at the controller level so we can interrupt it when we need to stop.
     var activeThread            : Thread = null
 
+    // The last time we ran, how long was the timer set for.
+    // Keep this so we can reset back when the timer expires or the user hits the reset button after stopping the timer
+    // half way through.
     var lastStartTime           : Int = -1
 
+    /**
+     * Setup the various listeners.
+     * @param here ignored
+     * @param res ignored as well.
+     */
     def initialize(here: URL, res: ResourceBundle) {
         secondsSlider.valueProperty().addListener(new SliderChangeListener(secondsLabel, "Second"))
         minutesSlider.valueProperty().addListener(new SliderChangeListener(minutesLabel, "Minute"))
@@ -46,13 +58,26 @@ class TeaTimerController extends Initializable {
         timerCount.addListener(new TimerCountChangeListener(this))
     }
 
+    /**
+     * Takes care of the start/stop button
+     *
+     * If there is a currently running thread we need to interrupt it so we don't get another tick a short time
+     * after pressing the stop button.
+     */
     def startStopButtonHandler() {
         if (activeThread != null && activeThread.isAlive) {
            activeThread.interrupt()    // this should stop the thread when we press the stop button.
         }
-        timerRunning.setValue(! timerRunning.get())
+        timerRunning.setValue(! timerRunning.get()) // flip the state, the listener on the timerRunning property will
+                                                    // take care of every thing else for us.
     }
 
+    /**
+     * Takes care of the reset button.
+     *
+     * If we stopped half way through a run the reset should be back to the last started time, rather than zero.
+     * The second time we press it though we should reset back to zero.
+     */
     def resetButtonHandler() {
         if (lastStartTime > 0) {
             setSlidersToCurrentTime(lastStartTime)
@@ -63,6 +88,9 @@ class TeaTimerController extends Initializable {
         }
     }
 
+    /**
+     * Start the timer counting.
+     */
     def startRun() {
         startStopButton.setText("Stop")
         resetButton.setDisable(true)
@@ -72,6 +100,9 @@ class TeaTimerController extends Initializable {
         waitOneSecond()
     }
 
+    /**
+     * Stop the timer counting, either by expiry or the user pressing the stop button.
+     */
     def stopRun() {
         startStopButton.setText("Start")
         resetButton.setDisable(false)
@@ -81,20 +112,32 @@ class TeaTimerController extends Initializable {
         }
     }
 
+    /**
+     * Effect at the end when the timer expires.
+     */
     def timerExpired() {
         val boomSound : AudioClip = new AudioClip(this.getClass.getResource("/res/Explode.wav").toString)
         boomSound.play()
 
         setSlidersToCurrentTime(lastStartTime)
+        lastStartTime = -1
     }
 
+    /**
+     * Work out the number of seconds the sliders are currently displaying.
+     * @return the number of seconds that the three sliders are currently displaying.
+     */
     def calculateNumberOfSeconds() : Int = {
         secondsSlider.getValue.toInt + (minutesSlider.getValue.toInt * 60) + (hoursSlider.getValue.toInt * 60 * 60)
     }
 
+    /**
+     * Given a time, set the sliders to show it. This will ripple through to the labels thanks to the listeners.
+     * @param time number of seconds to set the sliders to.
+     */
     def setSlidersToCurrentTime(time : Int) {
         var t = time
-        if (t == 0) {
+        if (t == 0) {   // short cut the zero option so we don't have worry about div by zero
             secondsSlider.setValue(0D)
             minutesSlider.setValue(0D)
             hoursSlider.setValue(0D)
@@ -113,9 +156,10 @@ class TeaTimerController extends Initializable {
     }
 
     /**
-     * Deals with the delayed execution of the TimerTickEvent
+     * Deals with delaying the execution of the TimerTickEvent
      *
      * We have to run this in another thread so as not to stop the gui from responding.
+     * We also have to create a new one every time as tasks don't seem to be re-usable.
      */
     def waitOneSecond() {
         val task : Task[Boolean] = new Task[Boolean]() {
