@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
 
-<VBox prefHeight="143.0" prefWidth="258.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.wselwood.teatimer.gui.TeaTimerController">
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="org.wselwood.teatimer.gui.TeaTimerController">
   <children>
     <GridPane prefHeight="89.0" prefWidth="190.0">
       <children>
@@ -37,10 +37,13 @@
           <children>
             <Button fx:id="startStopButton" defaultButton="true" text="Start" onAction="#startStopButtonHandler"/>
           </children>
+          <padding>
+            <Insets left="2.0" />
+          </padding>
         </HBox>
         <HBox alignment="TOP_RIGHT" prefHeight="23.0" prefWidth="146.0" spacing="5.0">
           <children>
-            <Button cancelButton="true" text="Reset" onAction="#resetButtonHandler"  />
+            <Button fx:id="resetButton" cancelButton="true" text="Reset" onAction="#resetButtonHandler"  />
           </children>
           <padding>
             <Insets right="2.0" />
@@ -50,11 +53,6 @@
       <padding>
         <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
       </padding>
-    </HBox>
-    <HBox prefHeight="27.0" prefWidth="258.0">
-      <children>
-        <ProgressBar fx:id="timerProgress" prefHeight="27.0" prefWidth="258.0" progress="0.0" />
-      </children>
     </HBox>
   </children>
 </VBox>

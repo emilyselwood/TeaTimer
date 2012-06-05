@@ -27,6 +27,8 @@ object TeaTimer {
 
 // Just sets up the stage. Has to be a class as it is instantiated by the Application.launch above.
 class TeaTimer extends Application {
+
+    var controller : TeaTimerController = null
     override def start(primaryStage: Stage) {
 
         // Initial setup of the stage
@@ -35,7 +37,7 @@ class TeaTimer extends Application {
         primaryStage.setResizable(false)
 
         // Set a few handlers that can be useful. Remove if you don't need them.
-        primaryStage.setOnHiding(new ShutdownHandler())
+        primaryStage.setOnHiding(new ShutdownHandler(this))
         // Disabled as we have stopped resizing
         //primaryStage.heightProperty().addListener(new WindowSizeListener("window.Height", primaryStage))
         //primaryStage.widthProperty().addListener(new WindowSizeListener("window.Width", primaryStage))
@@ -43,7 +45,7 @@ class TeaTimer extends Application {
         // Actually load our scene. As long as your controller and fxml file are in the same place this should work fine.
         // The second parameter is to the properties file for localization.
         val loaded = SceneLoader[TeaTimerController](classOf[TeaTimerController].getResource("TeaTimer.fxml"), "org.wselwood.teatimer.gui.TeaTimer")
-
+        controller = loaded.controller
         // Create the scene from the one we loaded.
         val scene = new Scene(loaded.parent)
 
@@ -54,9 +56,11 @@ class TeaTimer extends Application {
 }
 
 // Event handlers for shut down and window size.
-class ShutdownHandler extends EventHandler[WindowEvent] {
+class ShutdownHandler(parent : TeaTimer) extends EventHandler[WindowEvent] {
     def handle(event: WindowEvent) {
-
+        if (parent.controller != null && parent.controller.activeThread != null) {
+            parent.controller.activeThread.interrupt()
+        }
     }
 }
 

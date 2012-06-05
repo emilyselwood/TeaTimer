@@ -1,0 +1,64 @@
+apply plugin: 'scala'
+// run with scala -classpath "c:/Program Files/Oracle/JavaFX 2.1 SDK/rt/lib/*.jar" build/libs/TeaTimer-1.0.jar
+defaultTasks 'clean', 'compile', 'jar'
+
+project.ext {
+    JavaFXPath = "C:\\Program Files\\Oracle\\JavaFX 2.1 SDK\\rt\\lib"
+    scalaVersion = '2.9.1'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Libraries needed to run the scala tools
+    scalaTools  'org.scala-lang:scala-compiler:' + project.scalaVersion,
+                'org.scala-lang:scala-library:' + project.scalaVersion
+
+    // Libraries needed for scala api
+    compile     'org.scala-lang:scala-library:' + project.scalaVersion
+    runtime     'org.scala-lang:scala-library:' + project.scalaVersion
+    // JavaFX
+    compile fileTree(dir: project.JavaFXPath, include: "*.jar" )
+    runtime fileTree(dir: project.JavaFXPath, include: "*.jar" )
+}
+
+sourceSets {
+    main {
+        scala {
+            srcDir 'src'
+        }
+    }
+}
+
+sourceCompatibility = 1.7
+version = '1.0'
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'TeaTimer', 'Implementation-Version': version,
+                'Main-Class': 'org.wselwood.teatimer.TeaTimer'
+    }
+}
+
+task copyResources << {
+    // copy every thing in the res folder.
+    copy {
+        from 'res'
+        into 'build/classes/main/res'
+    }
+
+    // also copy *.properties, *.fxml, *.css into the classes folder where they were before.
+    copy {
+        from 'src'
+        into 'build/classes/main'
+        include '**/*.properties'
+        include '**/*.fxml'
+        include '**/*.css'
+    }
+}
+
+task compile(dependsOn: copyResources) << {
+    compileScala
+}
+
