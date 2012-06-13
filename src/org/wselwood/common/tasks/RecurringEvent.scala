@@ -33,6 +33,9 @@ class RecurringEvent(delay : Int, onEvent :() => Unit) {
             else if (runAgain()) {
                 start()
             }
+            else {
+                activeThread = null
+            }
         }))
         activeThread.setDaemon(true)
         activeThread.start()
