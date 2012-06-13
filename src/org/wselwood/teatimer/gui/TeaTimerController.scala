@@ -5,10 +5,10 @@ import javafx.fxml.{Initializable, FXML}
 import java.net.URL
 import java.util.ResourceBundle
 import javafx.beans.property.{SimpleIntegerProperty, SimpleBooleanProperty}
-import javafx.concurrent.{Task, WorkerStateEvent}
 import javafx.scene.media.AudioClip
 import org.wselwood.teatimer.TimeState
-import org.wselwood.common.gui.{Event, ChangeListener}
+import org.wselwood.common.gui.ChangeListener
+import org.wselwood.common.tasks.RecurringEvent
 
 /**
  * Controller for our tea timer.
@@ -41,7 +41,7 @@ class TeaTimerController extends Initializable {
 
     // The thread that will be used to wait for a second and then fire another event.
     // Held at the controller level so we can interrupt it when we need to stop.
-    private var activeThread            : Thread = null
+    private var ticker            : RecurringEvent = null
 
     // The last time we ran, how long was the timer set for.
     // Keep this so we can reset back when the timer expires or the user hits the reset button after stopping the timer
@@ -90,8 +90,8 @@ class TeaTimerController extends Initializable {
      * after pressing the stop button.
      */
     def startStopButtonHandler() {
-        if (activeThread != null && activeThread.isAlive) {
-           activeThread.interrupt()    // this should stop the thread when we press the stop button.
+        if (ticker != null ) {
+           ticker.stop()
         }
         timerRunning.setValue(! timerRunning.get()) // flip the state, the listener on the timerRunning property will
                                                     // take care of every thing else for us.
@@ -126,7 +126,11 @@ class TeaTimerController extends Initializable {
             stopRun()
         }
         else {
-            waitOneSecond()
+            ticker = new RecurringEvent(1000, { () => this.timerCount.set(this.timerCount.get() - 1) })
+            ticker.runAgain = {() => this.timerCount.get() > 0 && this.timerRunning.get()}
+            ticker.start()
+
+
         }
     }
 
@@ -185,36 +189,9 @@ class TeaTimerController extends Initializable {
         }
     }
 
-    /**
-     * Deals with delaying the execution of the TimerTickEvent
-     *
-     * We have to run this in another thread so as not to stop the gui from responding.
-     * We also have to create a new one every time as tasks don't seem to be re-usable.
-     */
-    def waitOneSecond() {
-        val task : Task[Boolean] = new Task[Boolean]() {
-            def call() : Boolean = {
-                Thread.sleep(1000)
-                true
-            }
-        }
-        task.setOnSucceeded(Event[WorkerStateEvent]({() =>
-            this.timerCount.set(this.timerCount.get() - 1)
-            if (this.timerCount.get() > 0 && this.timerRunning.get() == true) {
-                // if there is still time wait another second.
-                this.waitOneSecond()
-            }
-        }))
-
-        activeThread = new Thread(task)
-        activeThread.setDaemon(true)
-        activeThread.start()
-    }
-
-
     def shutDown() {
-        if (activeThread != null) {
-            activeThread.interrupt()
+        if (ticker != null ) {
+           ticker.stop()
         }
     }
 }
