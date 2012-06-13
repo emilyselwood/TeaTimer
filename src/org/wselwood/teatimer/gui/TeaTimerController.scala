@@ -106,7 +106,7 @@ class TeaTimerController extends Initializable {
     def resetButtonHandler() {
         if (lastStartTime > 0) {
             setSlidersToCurrentTime(lastStartTime)
-            lastStartTime = 0
+            lastStartTime = -1
         }
         else {
             setSlidersToCurrentTime(0)
@@ -119,8 +119,13 @@ class TeaTimerController extends Initializable {
     def startRun() {
         startStopButton.setText("Stop")
         resetButton.setDisable(true)
-        lastStartTime = calculateNumberOfSeconds()
-        timerCount.set(lastStartTime)
+        if(lastStartTime == -1) {
+            lastStartTime = calculateNumberOfSeconds()
+            timerCount.set(lastStartTime)
+        }
+        else {
+            timerCount.set(calculateNumberOfSeconds())
+        }
 
         if (timerCount.get() == 0) {
             stopRun()

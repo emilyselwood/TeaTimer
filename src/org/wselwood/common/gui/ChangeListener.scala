@@ -14,10 +14,16 @@ import javafx.scene.control.Label
 
 object ChangeListener {
 
+    /**
+     * Wrapper around the change listener so we can feed it a closure that takes two arguments.
+     * @param f the closure
+     * @tparam T the type of the change listener.
+     * @return the change listener we want
+     */
     def apply[T](f: (T, T) => Unit ) : javafx.beans.value.ChangeListener[T] = {
         new javafx.beans.value.ChangeListener[T] {
-            def changed(p1: ObservableValue[_ <: T], p2: T, p3: T) {
-                f(p2, p3)
+            def changed(observableValue: ObservableValue[_ <: T], oldValue : T, newValue : T) {
+                f(oldValue, newValue)
             }
         }
     }
