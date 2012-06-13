@@ -5,11 +5,10 @@ import javafx.fxml.{Initializable, FXML}
 import java.net.URL
 import java.util.ResourceBundle
 import javafx.beans.property.{SimpleIntegerProperty, SimpleBooleanProperty}
-import javafx.event.EventHandler
 import javafx.concurrent.{Task, WorkerStateEvent}
 import javafx.scene.media.AudioClip
-import org.wselwood.common.gui.ChangeListener
 import org.wselwood.teatimer.TimeState
+import org.wselwood.common.gui.{Event, ChangeListener}
 
 /**
  * Controller for our tea timer.
@@ -60,9 +59,9 @@ class TeaTimerController extends Initializable {
         minutesSlider.valueProperty().bindBidirectional(timerState.minutes)
         hoursSlider.valueProperty().bindBidirectional(timerState.hours)
 
-        timerState.seconds.addListener(ChangeListener.intPluralLabelUpdater(secondsLabel, "second"))
-        timerState.minutes.addListener(ChangeListener.intPluralLabelUpdater(minutesLabel, "minute"))
-        timerState.hours.addListener(ChangeListener.intPluralLabelUpdater(hoursLabel, "hour"))
+        timerState.seconds.addListener(ChangeListener.pluralLabelUpdater(secondsLabel, "second"))
+        timerState.minutes.addListener(ChangeListener.pluralLabelUpdater(minutesLabel, "minute"))
+        timerState.hours.addListener(ChangeListener.pluralLabelUpdater(hoursLabel, "hour"))
 
 
         timerRunning.addListener(ChangeListener( { (oldValue: java.lang.Boolean, newValue: java.lang.Boolean) =>
@@ -123,7 +122,12 @@ class TeaTimerController extends Initializable {
         lastStartTime = calculateNumberOfSeconds()
         timerCount.set(lastStartTime)
 
-        waitOneSecond()
+        if (timerCount.get() == 0) {
+            stopRun()
+        }
+        else {
+            waitOneSecond()
+        }
     }
 
     /**
@@ -194,7 +198,13 @@ class TeaTimerController extends Initializable {
                 true
             }
         }
-        task.setOnSucceeded(new TimerTickEvent(this))
+        task.setOnSucceeded(Event[WorkerStateEvent]({() =>
+            this.timerCount.set(this.timerCount.get() - 1)
+            if (this.timerCount.get() > 0 && this.timerRunning.get() == true) {
+                // if there is still time wait another second.
+                this.waitOneSecond()
+            }
+        }))
 
         activeThread = new Thread(task)
         activeThread.setDaemon(true)
@@ -205,21 +215,6 @@ class TeaTimerController extends Initializable {
     def shutDown() {
         if (activeThread != null) {
             activeThread.interrupt()
-        }
-    }
-}
-
-/**
- * Used once a second to decrement the counters.
- * @param controller the controller we are working on.
- */
-private class TimerTickEvent(controller: TeaTimerController) extends EventHandler[WorkerStateEvent] {
-    def handle(p1: WorkerStateEvent) {
-        controller.timerCount.set(controller.timerCount.get() - 1)
-        if (controller.timerCount.get() > 0 && controller.timerRunning.get() == true) {
-            // if there is still time wait another second.
-            controller.waitOneSecond()
-
         }
     }
 }
