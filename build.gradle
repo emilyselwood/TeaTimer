@@ -18,10 +18,9 @@ dependencies {
 
     // Libraries needed for scala api
     compile     'org.scala-lang:scala-library:' + project.scalaVersion
-    runtime     'org.scala-lang:scala-library:' + project.scalaVersion
+
     // JavaFX
     compile fileTree(dir: project.JavaFXPath, include: "*.jar" )
-    runtime fileTree(dir: project.JavaFXPath, include: "*.jar" )
 }
 
 sourceSets {

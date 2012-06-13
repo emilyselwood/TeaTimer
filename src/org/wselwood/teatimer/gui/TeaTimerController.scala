@@ -4,11 +4,12 @@ import javafx.scene.control.{Label, Slider, Button}
 import javafx.fxml.{Initializable, FXML}
 import java.net.URL
 import java.util.ResourceBundle
-import javafx.beans.value.{ObservableValue, ChangeListener}
 import javafx.beans.property.{SimpleIntegerProperty, SimpleBooleanProperty}
 import javafx.event.EventHandler
 import javafx.concurrent.{Task, WorkerStateEvent}
 import javafx.scene.media.AudioClip
+import org.wselwood.common.gui.ChangeListener
+import org.wselwood.teatimer.TimeState
 
 /**
  * Controller for our tea timer.
@@ -19,6 +20,9 @@ import javafx.scene.media.AudioClip
  *
  */
 class TeaTimerController extends Initializable {
+
+    // the current state of what should be shown on the screen.
+    var timerState = new TimeState()
 
     @FXML var secondsSlider     : Slider = null
     @FXML var minutesSlider     : Slider = null
@@ -51,11 +55,33 @@ class TeaTimerController extends Initializable {
      * @param res ignored as well.
      */
     def initialize(here: URL, res: ResourceBundle) {
-        secondsSlider.valueProperty().addListener(new SliderChangeListener(secondsLabel, "Second"))
-        minutesSlider.valueProperty().addListener(new SliderChangeListener(minutesLabel, "Minute"))
-        hoursSlider.valueProperty().addListener(new SliderChangeListener(hoursLabel, "Hour"))
-        timerRunning.addListener(new RunningStateChangeListener(this))
-        timerCount.addListener(new TimerCountChangeListener(this))
+
+        secondsSlider.valueProperty().bindBidirectional(timerState.seconds)
+        minutesSlider.valueProperty().bindBidirectional(timerState.minutes)
+        hoursSlider.valueProperty().bindBidirectional(timerState.hours)
+
+        timerState.seconds.addListener(ChangeListener.intPluralLabelUpdater(secondsLabel, "second"))
+        timerState.minutes.addListener(ChangeListener.intPluralLabelUpdater(minutesLabel, "minute"))
+        timerState.hours.addListener(ChangeListener.intPluralLabelUpdater(hoursLabel, "hour"))
+
+
+        timerRunning.addListener(ChangeListener( { (oldValue: java.lang.Boolean, newValue: java.lang.Boolean) =>
+            if (newValue) {
+                // we are about to start the timer.
+                this.startRun()
+            }
+            else {
+                // we are stopping the timer.
+                this.stopRun()
+            }
+        }))
+
+        timerCount.addListener(ChangeListener( { (oldValue: Number, newValue: Number) =>
+            this.setSlidersToCurrentTime(newValue.intValue())
+            if (newValue.intValue() <= 0) {
+                this.timerRunning.set(false)
+            }
+        }))
     }
 
     /**
@@ -128,7 +154,7 @@ class TeaTimerController extends Initializable {
      * @return the number of seconds that the three sliders are currently displaying.
      */
     def calculateNumberOfSeconds() : Int = {
-        secondsSlider.getValue.toInt + (minutesSlider.getValue.toInt * 60) + (hoursSlider.getValue.toInt * 60 * 60)
+        timerState.seconds.get() + (timerState.minutes.get() * 60) + (timerState.hours.get() * 60 * 60)
     }
 
     /**
@@ -138,20 +164,20 @@ class TeaTimerController extends Initializable {
     def setSlidersToCurrentTime(time : Int) {
         var t = time
         if (t == 0) {   // short cut the zero option so we don't have worry about div by zero
-            secondsSlider.setValue(0D)
-            minutesSlider.setValue(0D)
-            hoursSlider.setValue(0D)
+            timerState.seconds.set(0)
+            timerState.minutes.set(0)
+            timerState.hours.set(0)
         }
         else {
             val hours = t / (60 * 60)
-            hoursSlider.setValue(hours)
+            timerState.hours.set(hours)
             t = t % (60 * 60 )
 
             val minutes = t / 60
-            minutesSlider.setValue(minutes)
+            timerState.minutes.set(minutes)
             t = t % 60
 
-            secondsSlider.setValue(t)
+            timerState.seconds.set(t)
         }
     }
 
@@ -184,24 +210,6 @@ class TeaTimerController extends Initializable {
 }
 
 /**
- * Deals with changes to the running state.
- *
- * @param controller the controller that this operates on.
- */
-private class RunningStateChangeListener(controller: TeaTimerController) extends ChangeListener[java.lang.Boolean] {
-    def changed(value: ObservableValue[_ <: java.lang.Boolean], oldValue: java.lang.Boolean, newValue: java.lang.Boolean) {
-        if (newValue) {
-            // we are about to start the timer.
-            controller.startRun()
-        }
-        else {
-            // we are stopping the timer.
-            controller.stopRun()
-        }
-    }
-}
-
-/**
  * Used once a second to decrement the counters.
  * @param controller the controller we are working on.
  */
@@ -215,40 +223,3 @@ private class TimerTickEvent(controller: TeaTimerController) extends EventHandle
         }
     }
 }
-
-/**
- * Deals with the updates when the timer count changes. Triggers the update to the sliders and stops every thing running
- * when we get to 0 seconds remaining.
- *
- * @param controller the controller that contains the sliders we need to trigger the update on.
- */
-private class TimerCountChangeListener(controller: TeaTimerController) extends ChangeListener[Number] {
-    def changed(value: ObservableValue[_ <: Number], oldValue: Number, newValue: Number) {
-        controller.setSlidersToCurrentTime(newValue.intValue())
-        if (newValue.intValue() <= 0) {
-            controller.timerRunning.set(false)
-        }
-    }
-}
-
-/**
- * Deals with keeping the labels in sync with the sliders.
- *
- * Sorts out the s or not being on the postfix. so "Second" is normally "Seconds"
- * unless the new value is 1 in which case its "1 Second"
- *
- * @param label the label to keep up-to-date.
- * @param postFix the post fix to append to the end of the label
- */
-private class SliderChangeListener(label : Label, postFix : String) extends ChangeListener[Number] {
-
-    def changed(value: ObservableValue[_ <: Number], oldValue: Number, newValue: Number) {
-        val toBe = newValue.intValue()
-        label.setText(toBe match {
-            case 1 => "1 " + postFix
-            case i: Int => i + " " + postFix + "s"
-        })
-    }
-}
-
-
