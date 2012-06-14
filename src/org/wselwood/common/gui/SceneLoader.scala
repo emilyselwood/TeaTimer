@@ -8,7 +8,7 @@ import javafx.scene.Parent
 /**
  * Simple wrapper around the creation of an fxml scene. Gives back both the Parent and the controller object.
  *
- * User: Sparrow
+ * User: wselwood
  * Date: 13/02/12
  * Time: 07:06
  *

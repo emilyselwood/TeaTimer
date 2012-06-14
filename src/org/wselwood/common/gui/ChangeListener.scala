@@ -6,7 +6,7 @@ import javafx.scene.control.Label
 
 /**
  *
- * User: Sparrow
+ * User: wselwood
  * Date: 13/06/12
  * Time: 07:52
  *

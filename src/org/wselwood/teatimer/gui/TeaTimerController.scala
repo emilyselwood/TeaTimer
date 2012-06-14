@@ -13,7 +13,7 @@ import org.wselwood.common.tasks.RecurringEvent
 /**
  * Controller for our tea timer.
  *
- * User: Sparrow
+ * User: wselwood
  * Date: 04/06/12
  * Time: 13:04
  *
@@ -131,11 +131,9 @@ class TeaTimerController extends Initializable {
             stopRun()
         }
         else {
-            ticker = new RecurringEvent(1000, { () => this.timerCount.set(this.timerCount.get() - 1) })
+            ticker = new RecurringEvent(1000, { this.timerCount.set(this.timerCount.get() - 1) })
             ticker.runAgain = {() => this.timerCount.get() > 0 && this.timerRunning.get()}
             ticker.start()
-
-
         }
     }
 

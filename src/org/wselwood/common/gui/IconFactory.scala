@@ -11,7 +11,7 @@ import collection.mutable
  * Expects to find the images in "/res/icons/" by default. Change this if your icons are some where else
  *
  *
- * User: Sparrow
+ * User: wselwood
  * Date: 16/02/12
  * Time: 08:09
  *

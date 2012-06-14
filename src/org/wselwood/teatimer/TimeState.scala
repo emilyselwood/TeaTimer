@@ -5,7 +5,7 @@ import javafx.beans.property.{SimpleIntegerProperty, IntegerProperty, Property}
 
 /**
  *
- * User: Sparrow
+ * User: wselwood
  * Date: 13/06/12
  * Time: 18:19
  *
